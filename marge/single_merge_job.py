@@ -66,8 +66,8 @@ class SingleMergeJob(MergeJob):
 
             sha_now = Commit.last_on_branch(source_project.id, merge_request.source_branch, api).id
             # Make sure no-one managed to race and push to the branch in the
-            # meantime, because we're about to impersonate the approvers, and
-            # we don't want to approve unreviewed commits
+            # meantime, because we're about to reapprove, and we don't want
+            # to approve unreviewed commits
             if sha_now != actual_sha:
                 raise CannotMerge('Someone pushed to branch while we were trying to merge')
 

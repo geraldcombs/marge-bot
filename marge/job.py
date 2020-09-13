@@ -204,7 +204,7 @@ class MergeJob:
 
     def maybe_reapprove(self, merge_request, approvals):
         # Re-approve the merge request, in case us pushing it has removed approvals.
-        if self.opts.reapprove:
+        if self.opts.reapprove == 'impersonate' or self.opts.reapprove == 'direct':
             # approving is not idempotent, so we need to check first that there are no approvals,
             # otherwise we'll get a failure on trying to re-instate the previous approvals
             def sufficient_approvals():
@@ -219,7 +219,10 @@ class MergeJob:
                 time.sleep(waiting_time_in_secs)
                 iterations -= 1
             if not sufficient_approvals():
-                approvals.reapprove()
+                if self.opts.reapprove == 'impersonate':
+                    approvals.reapprove_as_approvers()
+                elif self.opts.reapprove == 'direct':
+                    approvals.reapprove_as_marge()
 
     def fetch_source_project(self, merge_request):
         remote = 'origin'
@@ -422,7 +425,7 @@ class MergeJobOptions(namedtuple('MergeJobOptions', JOB_OPTIONS)):
     @classmethod
     def default(
             cls, *,
-            add_tested=False, add_part_of=False, add_reviewers=False, reapprove=False,
+            add_tested=False, add_part_of=False, add_reviewers=False, reapprove=None,
             approval_timeout=None, embargo=None, ci_timeout=None, fusion=Fusion.rebase,
             use_no_ff_batches=False,
     ):

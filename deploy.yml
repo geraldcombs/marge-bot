@@ -37,7 +37,7 @@ objects:
               image: "$(APP_IMAGE)"
               imagePullPolicy: Always
               args: ["--gitlab-url=$(MARGE_GITLAB_URL)",
-                     "--impersonate-approvers",
+                     "--reapprove=impersonate",
                      "--add-tested",
                      "--add-reviewers",
                      "--add-part-of"]

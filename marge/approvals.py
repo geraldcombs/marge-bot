@@ -1,3 +1,5 @@
+import logging as log
+
 from . import gitlab
 
 GET, POST, PUT = gitlab.GET, gitlab.POST, gitlab.PUT
@@ -41,18 +43,31 @@ class Approvals(gitlab.Resource):
         """Return the uids of the approvers."""
         return [who['user']['id'] for who in self.info['approved_by']]
 
-    def reapprove(self):
+    @property
+    def approval_url(self):
+        if self._api.version().release >= (9, 2, 2):
+            return '/projects/{0.project_id}/merge_requests/{0.iid}/approve'.format(self)
+
+        # GitLab botched the v4 api before 9.2.3
+        return '/projects/{0.project_id}/merge_requests/{0.id}/approve'.format(self)
+
+    def reapprove_as_approvers(self):
         """Impersonates the approvers and re-approves the merge_request as them.
 
         The idea is that we want to get the approvers, push the rebased branch
         (which may invalidate approvals, depending on GitLab settings) and then
         restore the approval status.
         """
-        if self._api.version().release >= (9, 2, 2):
-            approve_url = '/projects/{0.project_id}/merge_requests/{0.iid}/approve'.format(self)
-        else:
-            # GitLab botched the v4 api before 9.2.3
-            approve_url = '/projects/{0.project_id}/merge_requests/{0.id}/approve'.format(self)
-
         for uid in self.approver_ids:
-            self._api.call(POST(approve_url), sudo=uid)
+            log.info('Approving as user %d', uid)
+            self._api.call(POST(self.approval_url), sudo=uid)
+
+    def reapprove_as_marge(self):
+        """Re-approves as the marge-bot user.
+
+        The idea is that we want to get the approvers, push the rebased branch
+        (which may invalidate approvals, depending on GitLab settings) and then
+        restore the approval status.
+        """
+        log.info('Approving as marge')
+        self._api.call(POST(self.approval_url))

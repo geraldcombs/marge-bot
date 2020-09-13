@@ -756,7 +756,7 @@ class TestUpdateAndAccept:  # pylint: disable=too-many-public-methods
     def test_waits_for_approvals(self, mock_log, mocks_factory):
         five_secs = timedelta(seconds=5)
         _, api, job = mocks_factory(
-            extra_opts=dict(approval_timeout=five_secs, reapprove=True)
+            extra_opts=dict(approval_timeout=five_secs, reapprove='impersonate')
         )
         job.execute()
 

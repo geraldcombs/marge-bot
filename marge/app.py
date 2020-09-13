@@ -140,9 +140,13 @@ def _parse_config(args):
         help='Add "Reviewed-by: $approver" for each approver of MR to each commit in MR.\n',
     )
     parser.add_argument(
-        '--impersonate-approvers',
-        action='store_true',
-        help='Marge-bot pushes effectively don\'t change approval status.\n',
+        '--reapprove',
+        default=None,
+        choices=(None, 'impersonate', 'direct'),
+        help=(
+            "Reapprove the MR. impersonate (as the original approvers), direct (as marge),"
+            "or None (don't reapprove, default)\n"
+        ),
     )
     parser.add_argument(
         '--merge-order',
@@ -306,7 +310,7 @@ def main(args=None):
                 add_tested=options.add_tested,
                 add_part_of=options.add_part_of,
                 add_reviewers=options.add_reviewers,
-                reapprove=options.impersonate_approvers,
+                reapprove=options.reapprove,
                 approval_timeout=options.approval_reset_timeout,
                 embargo=options.embargo,
                 ci_timeout=options.ci_timeout,

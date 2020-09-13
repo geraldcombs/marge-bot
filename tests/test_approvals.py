@@ -107,7 +107,7 @@ class TestApprovals:
         assert good_approvals.sufficient
 
     def test_reapprove(self):
-        self.approvals.reapprove()
+        self.approvals.reapprove_as_approvers()
         self.api.call.has_calls([
             call(POST(endpoint='/projects/1/merge_requests/6/approve', args={}, extract=None), sudo=1),
             call(POST(endpoint='/projects/1/merge_requests/6/approve', args={}, extract=None), sudo=2)

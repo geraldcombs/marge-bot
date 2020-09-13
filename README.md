@@ -93,9 +93,10 @@ optional arguments:
                            [env var: MARGE_ADD_PART_OF] (default: False)
   --add-reviewers       Add "Reviewed-by: $approver" for each approver of MR to each commit in MR.
                            [env var: MARGE_ADD_REVIEWERS] (default: False)
-  --impersonate-approvers
-                        Marge-bot pushes effectively don't change approval status.
-                           [env var: MARGE_IMPERSONATE_APPROVERS] (default: False)
+  --reapprove           Reapprove the MR.
+                        Do so as the original approvers and effectively keep the approval status
+                        (impersonate), do so as marge (direct), or don't reapprove (none).
+                           [env var: MARGE_REAPPROVE] (default: none)
   --merge-order         The order you want marge to merge its requests.
                         As of earliest merge request creation time (created_at) or update time (updated_at)
                           [env var: MARGE_MERGE_ORDER] (default: created_at)
@@ -143,7 +144,7 @@ embargo: Friday 1pm - Monday 9am
 batch: false
 git-timeout: 120s
 gitlab-url: "https://gitlab.example.com"
-impersonate-approvers: true
+reapprove: impersonate
 project-regexp: .*
 # choose one way of specifying the SSH key
 #ssh-key: KEY
@@ -161,7 +162,7 @@ code strips trailing whitespace in the name, so it won't show up elsewhere).
 Then add `marge-bot` to your projects as `Developer` or `Master`, the latter
 being required if she will merge to protected branches.
 
-For certain features, namely, `--impersonate-approvers`, and `--add-reviewers`,
+For certain features, namely, `--reapprove=impersonate`, and `--add-reviewers`,
 you will need to grant `marge-bot` admin privileges as well. In the latter, so
 that she can query the email of the reviewers to include it in the commit. Note
 that if you're trying to run marge-bot against a GitLab instance you don't have
@@ -222,7 +223,7 @@ Smarkets ourselves:
 add-part-of: true
 add-reviewers: true
 add-tested: true
-impersonate-approvers: true
+reapprove: impersonate
 gitlab-url: "https://git.corp.smarkets.com"
 project-regexp: "smarkets/smarkets$"
 auth-token: "WoNtTelly0u"
@@ -239,7 +240,7 @@ docker run --restart=on-failure \
   --config-file=/configuration/marge-bot-config.yaml
 ```
 
-By default docker will use the `latest` tag, which corresponds to the latest 
+By default docker will use the `latest` tag, which corresponds to the latest
 stable version. You can also use the `stable` tag to make this more explicit.
 If you want a development version, you can use the `master` tag to obtain an
 image built from the HEAD commit of the `master` branch. Note that this image
@@ -353,8 +354,9 @@ for PRs and also turn on
 Unfortunately, since Marge-bot's flow is based on pushing to the source branch, this
 means it will reset the approval status if the latter option is enabled.
 However, if you have given Marge-bot admin privileges and turned on
-`--impersonate-approvers`, she will re-approve the merge request assuming after its own
+`--reapprove=impersonate`, she will re-approve the merge request assuming after its own
 push, but by impersonating the existing approvers.
+If you are unable to give Marge-bot admin privileges you can turn on `--reapprove=direct`, which will enable approval as Marge-bot.
 
 ## Merge embargoes
 

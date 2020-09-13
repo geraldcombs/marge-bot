@@ -195,7 +195,7 @@ class TestMergeJobOptions:
             add_tested=False,
             add_part_of=False,
             add_reviewers=False,
-            reapprove=False,
+            reapprove=None,
             approval_timeout=timedelta(seconds=0),
             embargo=marge.interval.IntervalUnion.empty(),
             ci_timeout=timedelta(minutes=15),

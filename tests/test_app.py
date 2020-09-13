@@ -29,7 +29,7 @@ ci-timeout: 5min
 embargo: Friday 1pm - Monday 7am
 git-timeout: 150s
 gitlab-url: "http://foo.com"
-impersonate-approvers: true
+reapprove: impersonate
 project-regexp: foo.*bar
 ssh-key: KEY
 '''
@@ -162,13 +162,13 @@ def test_rebase_remotely_option_conflicts():
 def test_impersonate_approvers():
     with env(MARGE_AUTH_TOKEN="NON-ADMIN-TOKEN", MARGE_SSH_KEY="KEY", MARGE_GITLAB_URL='http://foo.com'):
         with pytest.raises(AssertionError):
-            with main('--impersonate-approvers'):
+            with main('--reapprove=impersonate'):
                 pass
 
     with env(MARGE_AUTH_TOKEN="ADMIN-TOKEN", MARGE_SSH_KEY="KEY", MARGE_GITLAB_URL='http://foo.com'):
-        with main('--impersonate-approvers') as bot:
+        with main('--reapprove=impersonate') as bot:
             assert bot.config.merge_opts != job.MergeJobOptions.default()
-            assert bot.config.merge_opts == job.MergeJobOptions.default(reapprove=True)
+            assert bot.config.merge_opts == job.MergeJobOptions.default(reapprove='impersonate')
 
 
 def test_approval_reset_timeout():
@@ -267,7 +267,7 @@ def test_config_file():
                 add_tested=True,
                 add_part_of=True,
                 add_reviewers=True,
-                reapprove=True,
+                reapprove='impersonate',
                 ci_timeout=datetime.timedelta(seconds=5*60),
             )
             assert bot.config.project_regexp == re.compile('foo.*bar')
@@ -288,7 +288,7 @@ def test_config_overwrites():
                     add_tested=True,
                     add_part_of=True,
                     add_reviewers=True,
-                    reapprove=True,
+                    reapprove='impersonate',
                     ci_timeout=datetime.timedelta(seconds=20*60),
                 )
                 assert bot.config.project_regexp == re.compile('foo.*bar')
